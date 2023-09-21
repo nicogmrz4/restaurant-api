@@ -5,6 +5,7 @@ namespace App\Entity;
 use ApiPlatform\Metadata\ApiResource;
 use App\Repository\ClientRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: ClientRepository::class)]
 #[ApiResource]
@@ -16,19 +17,28 @@ class Client
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank()]
     private ?string $firstName = null;
-
+    
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank()]
     private ?string $lastName = null;
 
     #[ORM\Column]
+    #[Assert\GreaterThan(0)]
     private ?int $dni = null;
-
+    
     #[ORM\Column]
+    #[Assert\GreaterThan(0)]
     private ?int $phoneNumber = null;
 
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
+
+    public function __construct()
+    {
+        $this->createdAt = new \DateTimeImmutable();
+    }
 
     public function getId(): ?int
     {

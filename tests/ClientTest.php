@@ -12,6 +12,23 @@ class ClientTest extends ApiTestCase
 {
     use ResetDatabase, Factories;
 
+    public function getDefaultClientAsArray(array $atributes = []) {
+        $clientAsArray = [
+            'firstName' => 'John',
+            'lastName' => 'McGregor',
+            'phoneNumber' => 123456789,
+            'dni' => 123456789
+        ];
+
+        foreach ($atributes as $attr => $value) {
+            if (isset($clientAsArray[$attr])) {
+                $clientAsArray[$attr] = $value;
+            }
+        }
+
+        return $clientAsArray;
+    }
+
     public function testGetCollection(): void
     {
         ClientFactory::createMany(100);
@@ -38,12 +55,9 @@ class ClientTest extends ApiTestCase
 
     public function testCreateClient(): void
     {
-        $response = static::createClient()->request('POST', '/api/clients', ['json' => [
-            'firstName' => 'John',
-            'lastName' => 'McGregor',
-            'phoneNumber' => 123456789,
-            'dni' => 123456789
-        ]]);
+        $json = $this->getDefaultClientAsArray();
+
+        $response = static::createClient()->request('POST', '/api/clients', ['json' => $json]);
 
         $this->assertResponseStatusCodeSame(201);
         $this->assertResponseHeaderSame('content-type', 'application/ld+json; charset=utf-8');
@@ -162,12 +176,29 @@ class ClientTest extends ApiTestCase
     }
 
     public function testCreateClientWithBlankFirstName() {
-        $response = static::createClient()->request('POST', '/api/clients', ['json' => [
-            'firstName' => '',
-            'lastName' => 'McGregor',
-            'phoneNumber' => 123456789,
-            'dni' => 123456789
-        ]]);
+        $json = $this->getDefaultClientAsArray(['firstName' => '']);
+        static::createClient()->request('POST', '/api/clients', ['json' => $json]);
+
+        $this->assertResponseStatusCodeSame(422);
+    }
+
+    public function testCreateClientWithBlankLastName() {
+        $json = $this->getDefaultClientAsArray(['lastName' => '']);
+        static::createClient()->request('POST', '/api/clients', ['json' => $json]);
+
+        $this->assertResponseStatusCodeSame(422);
+    }
+
+    public function testCreateClientWithNegativePhoneNumber() {
+        $json = $this->getDefaultClientAsArray(['phoneNumber' => -111]);
+        static::createClient()->request('POST', '/api/clients', ['json' => $json]);
+
+        $this->assertResponseStatusCodeSame(422);
+    }
+
+    public function testCreateClientWithNegativeDni() {
+        $json = $this->getDefaultClientAsArray(['dni' => -111]);
+        static::createClient()->request('POST', '/api/clients', ['json' => $json]);
 
         $this->assertResponseStatusCodeSame(422);
     }
