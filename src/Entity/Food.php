@@ -14,6 +14,7 @@ use App\State\UpdateFoodProcessor;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: FoodRepository::class)]
 #[ApiResource(operations: [
@@ -22,7 +23,8 @@ use Doctrine\ORM\Mapping as ORM;
         processor: PostFoodProcessor::class
     ),
     new GetCollection(
-        uriTemplate: '/foods'
+        uriTemplate: '/foods',
+        normalizationContext: ['groups' => ['food:read']]
     ),
     new Get(
         uriTemplate: '/foods/{id}',
@@ -42,12 +44,15 @@ class Food
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['food:read'])]
     private ?string $name = null;
 
     #[ORM\Column]
+    #[Groups(['food:read'])]
     private ?float $currentPrice = null;
 
     #[ORM\OneToMany(mappedBy: 'food', targetEntity: FoodPriceHistory::class)]
+    #[Groups(['food:read'])]
     private Collection $priceHistory;
 
     public function __construct()

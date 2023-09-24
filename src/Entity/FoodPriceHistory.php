@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\FoodPriceHistoryRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: FoodPriceHistoryRepository::class)]
 class FoodPriceHistory
@@ -14,12 +15,15 @@ class FoodPriceHistory
     private ?int $id = null;
 
     #[ORM\Column]
+    #[Groups(['food:read'])]
     private ?float $price = null;
-
+    
     #[ORM\Column]
+    #[Groups(['food:read'])]
     private ?\DateTimeImmutable $periodFrom;
-
+    
     #[ORM\Column(nullable: true)]
+    #[Groups(['food:read'])]
     private ?\DateTimeImmutable $periodTo = null;
 
     #[ORM\ManyToOne(inversedBy: 'priceHistory')]
