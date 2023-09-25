@@ -20,7 +20,8 @@ use Symfony\Component\Serializer\Annotation\Groups;
 #[ApiResource(operations: [
     new Post(
         uriTemplate: '/foods',
-        processor: PostFoodProcessor::class
+        processor: PostFoodProcessor::class,
+        denormalizationContext: ['groups' => ['food:write']]
     ),
     new GetCollection(
         uriTemplate: '/foods',
@@ -44,11 +45,11 @@ class Food
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['food:read'])]
+    #[Groups(['food:read', 'food:write'])]
     private ?string $name = null;
 
     #[ORM\Column]
-    #[Groups(['food:read'])]
+    #[Groups(['food:read', 'food:write'])]
     private ?float $currentPrice = null;
 
     #[ORM\OneToMany(mappedBy: 'food', targetEntity: FoodPriceHistory::class)]
