@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use App\Repository\OrderItemRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: OrderItemRepository::class)]
 class OrderItem
@@ -12,18 +14,25 @@ class OrderItem
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
-
+    
     #[ORM\ManyToOne(inversedBy: 'items')]
-    #[ORM\JoinColumn(nullable: false)]
     private ?Order $owner = null;
-
+    
     #[ORM\Column(length: 255)]
+    #[Groups(['order:post', 'order-items:patch'])]
+    #[Assert\NotBlank]
     private ?string $name = null;
-
+    
     #[ORM\Column]
+    #[Groups(['order:post', 'order-items:patch'])]
+    #[Assert\GreaterThan(0)]
+    #[Assert\Type('integer')]
     private ?int $quantity = null;
-
+    
     #[ORM\Column]
+    #[Groups(['order:post', 'order-items:patch'])]
+    #[Assert\GreaterThan(0)]
+    #[Assert\Type('float')]
     private ?float $pricePerUnit = null;
 
     public function getId(): ?int

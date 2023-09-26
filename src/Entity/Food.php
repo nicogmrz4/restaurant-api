@@ -2,8 +2,6 @@
 
 namespace App\Entity;
 
-use ApiPlatform\Doctrine\Orm\Filter\DateFilter;
-use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Get;
@@ -32,7 +30,6 @@ use Symfony\Component\Serializer\Annotation\Groups;
         requirements: ['id' => '\d+'],
     ),
 ])]
-#[ApiFilter(DateFilter::class, properties: ['priceHistory.periodFrom', 'priceHistory.periodTo'])]
 class Food
 {
     #[ORM\Id]
