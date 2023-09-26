@@ -189,14 +189,14 @@ class ClientTest extends ApiTestCase
         $this->assertResponseStatusCodeSame(422);
     }
 
-    public function testCreateWithNegativePhoneNumber() {
+    public function testCreateWithInvalidPhoneNumber() {
         $json = $this->getDefaultClientAsArray(['phoneNumber' => -111]);
         static::createClient()->request('POST', '/api/clients', ['json' => $json]);
 
         $this->assertResponseStatusCodeSame(422);
     }
 
-    public function testCreateWithNegativeDni() {
+    public function testCreateWithInvalidDni() {
         $json = $this->getDefaultClientAsArray(['dni' => -111]);
         static::createClient()->request('POST', '/api/clients', ['json' => $json]);
 
