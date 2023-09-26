@@ -15,7 +15,7 @@ class FoodTest extends ApiTestCase
     public function getDefaultFoodAsArray(array $atributes = []) {
         $foodAsArray = [
             'name' => 'Pizza Grande De Muzzarella',
-            'currentPrice' => 2499.99
+            'price' => 2499.99
         ];
 
         foreach ($atributes as $attr => $value) {
@@ -59,12 +59,11 @@ class FoodTest extends ApiTestCase
         $this->assertResponseStatusCodeSame(201);
         $this->assertResponseHeaderSame('content-type', 'application/ld+json; charset=utf-8');
         $this->assertMatchesRegularExpression('~^/api/foods/\d+$~', $response->toArray()['@id']);
-        $this->assertCount(1, $response->toArray()['priceHistory']);
     }
 
     public function testUpdateName(): void
     {
-        FoodFactory::createOne(['name' => 'Pizza XL', 'currentPrice' => 299.99]);
+        FoodFactory::createOne(['name' => 'Pizza XL', 'price' => 299.99]);
 
         $foodIri = $this->findIriBy(Food::class, ['name' => 'Pizza XL']);
 
@@ -73,7 +72,7 @@ class FoodTest extends ApiTestCase
         $httpClient->request('PUT', $foodIri, [
             'json' => [
                 'name' => 'Empanada de carne',
-                'currentPrice' => 299.99
+                'price' => 299.99
             ],
             'headers' => [
                 'Content-Type: application/ld+json',
@@ -85,25 +84,24 @@ class FoodTest extends ApiTestCase
         $this->assertJsonContains([
             '@id' => $foodIri,
             'name' => 'Empanada de carne',
-            'currentPrice' => 299.99
+            'price' => 299.99
         ]);
     }
 
-    public function testUpdateCurrentPrice(): void
+    public function testUpdatePrice(): void
     {
         $json = $this->getDefaultFoodAsArray();
         $createResponse = static::createClient()->request('POST', '/api/foods', ['json' => $json]);
         $this->assertResponseStatusCodeSame(201);
         $this->assertResponseHeaderSame('content-type', 'application/ld+json; charset=utf-8');
         $this->assertMatchesRegularExpression('~^/api/foods/\d+$~', $createResponse->toArray()['@id']);
-        $this->assertCount(1, $createResponse->toArray()['priceHistory']);
 
         $foodIri = $createResponse->toArray()['@id'];
 
         $httpClient = static::createClient();
 
         $response = $httpClient->request('PUT', $foodIri, [
-            'json' => $this->getDefaultFoodAsArray(['currentPrice' => 1999.99]),
+            'json' => $this->getDefaultFoodAsArray(['price' => 1999.99]),
             'headers' => [
                 'Content-Type: application/ld+json',
                 'accept: application/ld+json'
@@ -114,8 +112,7 @@ class FoodTest extends ApiTestCase
         $this->assertJsonContains([
             '@id' => $foodIri,
             'name' => $json['name'],
-            'currentPrice' => 1999.99
+            'price' => 1999.99
         ]);
-        $this->assertCount(2, $response->toArray()['priceHistory']);
     }
 }

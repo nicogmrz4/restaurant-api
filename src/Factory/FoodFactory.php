@@ -47,7 +47,7 @@ final class FoodFactory extends ModelFactory
     protected function getDefaults(): array
     {
         return [
-            'currentPrice' => self::faker()->randomFloat(2, 1000, 4000),
+            'price' => self::faker()->randomFloat(2, 1000, 4000),
             'name' => self::faker()->sentence(3),
         ];
     }

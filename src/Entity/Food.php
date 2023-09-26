@@ -2,17 +2,14 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Doctrine\Orm\Filter\DateFilter;
+use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
-use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Put;
 use App\Repository\FoodRepository;
-use App\State\PostFoodProcessor;
-use App\State\UpdateFoodProcessor;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 
@@ -20,7 +17,6 @@ use Symfony\Component\Serializer\Annotation\Groups;
 #[ApiResource(operations: [
     new Post(
         uriTemplate: '/foods',
-        processor: PostFoodProcessor::class,
         denormalizationContext: ['groups' => ['food:write']]
     ),
     new GetCollection(
@@ -34,9 +30,9 @@ use Symfony\Component\Serializer\Annotation\Groups;
     new Put(
         uriTemplate: '/foods/{id}',
         requirements: ['id' => '\d+'],
-        processor: UpdateFoodProcessor::class,
     ),
 ])]
+#[ApiFilter(DateFilter::class, properties: ['priceHistory.periodFrom', 'priceHistory.periodTo'])]
 class Food
 {
     #[ORM\Id]
@@ -50,16 +46,7 @@ class Food
 
     #[ORM\Column]
     #[Groups(['food:read', 'food:write'])]
-    private ?float $currentPrice = null;
-
-    #[ORM\OneToMany(mappedBy: 'food', targetEntity: FoodPriceHistory::class)]
-    #[Groups(['food:read'])]
-    private Collection $priceHistory;
-
-    public function __construct()
-    {
-        $this->priceHistory = new ArrayCollection();
-    }
+    private ?float $price = null;
 
     public function getId(): ?int
     {
@@ -78,44 +65,14 @@ class Food
         return $this;
     }
 
-    public function getCurrentPrice(): ?float
+    public function getPrice(): ?float
     {
-        return $this->currentPrice;
+        return $this->price;
     }
 
-    public function setCurrentPrice(float $currentPrice): static
+    public function setPrice(float $price): static
     {
-        $this->currentPrice = $currentPrice;
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, FoodPriceHistory>
-     */
-    public function getPriceHistory(): Collection
-    {
-        return $this->priceHistory;
-    }
-
-    public function addPriceHistory(FoodPriceHistory $priceHistory): static
-    {
-        if (!$this->priceHistory->contains($priceHistory)) {
-            $this->priceHistory->add($priceHistory);
-            $priceHistory->setFood($this);
-        }
-
-        return $this;
-    }
-
-    public function removePriceHistory(FoodPriceHistory $priceHistory): static
-    {
-        if ($this->priceHistory->removeElement($priceHistory)) {
-            // set the owning side to null (unless already changed)
-            if ($priceHistory->getFood() === $this) {
-                $priceHistory->setFood(null);
-            }
-        }
+        $this->price = $price;
 
         return $this;
     }
