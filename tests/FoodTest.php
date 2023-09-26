@@ -19,8 +19,8 @@ class FoodTest extends ApiTestCase
         ];
 
         foreach ($atributes as $attr => $value) {
-            if (isset($clientAsArray[$attr])) {
-                $clientAsArray[$attr] = $value;
+            if (isset($foodAsArray[$attr])) {
+                $foodAsArray[$attr] = $value;
             }
         }
 
@@ -64,7 +64,7 @@ class FoodTest extends ApiTestCase
 
     public function testUpdateName(): void
     {
-        FoodFactory::createOne(['name' => 'Pizza XL', 'currentPirce' => 299.99]);
+        FoodFactory::createOne(['name' => 'Pizza XL', 'currentPrice' => 299.99]);
 
         $foodIri = $this->findIriBy(Food::class, ['name' => 'Pizza XL']);
 
@@ -72,7 +72,8 @@ class FoodTest extends ApiTestCase
 
         $httpClient->request('PUT', $foodIri, [
             'json' => [
-                'name' => 'Empanada de carne'
+                'name' => 'Empanada de carne',
+                'currentPrice' => 299.99
             ],
             'headers' => [
                 'Content-Type: application/ld+json',
@@ -102,9 +103,7 @@ class FoodTest extends ApiTestCase
         $httpClient = static::createClient();
 
         $response = $httpClient->request('PUT', $foodIri, [
-            'json' => [
-                'currentPrice' => 1999.99
-            ],
+            'json' => $this->getDefaultFoodAsArray(['currentPrice' => 1999.99]),
             'headers' => [
                 'Content-Type: application/ld+json',
                 'accept: application/ld+json'
