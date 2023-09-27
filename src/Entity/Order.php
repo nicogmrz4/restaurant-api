@@ -44,7 +44,7 @@ class Order
 
     #[ORM\ManyToOne(inversedBy: 'orders')]
     #[Groups(['order:post', 'order:get-collection'])]
-    private ?Client $client = null;
+    private ?Customer $customer = null;
 
     #[ORM\Column]
     #[Groups(['order:get-collection'])]
@@ -79,14 +79,14 @@ class Order
         return $this->id;
     }
 
-    public function getClient(): ?Client
+    public function getCustomer(): ?Customer
     {
-        return $this->client;
+        return $this->customer;
     }
 
-    public function setClient(?Client $client): static
+    public function setCustomer(?Customer $customer): static
     {
-        $this->client = $client;
+        $this->customer = $customer;
 
         return $this;
     }

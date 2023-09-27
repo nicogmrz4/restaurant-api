@@ -3,7 +3,7 @@
 namespace App\Tests;
 
 use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
-use App\Factory\ClientFactory;
+use App\Factory\CustomerFactory;
 use App\Factory\OrderFactory;
 use App\Factory\OrderItemFactory;
 use Zenstruck\Foundry\Test\Factories;
@@ -40,14 +40,14 @@ class OrderTest extends ApiTestCase
 
     public function testCreate(): void
     {
-        $client = ClientFactory::createOne();
+        $customer = CustomerFactory::createOne();
 
         $response = static::createClient()->request(
             'POST',
             '/api/orders',
             [
                 'json' => [
-                    'client' => '/api/clients/' . $client->getId(),
+                    'customer' => '/api/customers/' . $customer->getId(),
                     'items' => [
                         ['name' => 'Burger XL', 'quantity' => 2, 'pricePerUnit' => 250.2],
                         ['name' => 'Burger XXL', 'quantity' => 1, 'pricePerUnit' => 500.2],
@@ -70,14 +70,14 @@ class OrderTest extends ApiTestCase
 
     public function testCreateWihtoutItems(): void
     {
-        $client = ClientFactory::createOne();
+        $customer = CustomerFactory::createOne();
 
         static::createClient()->request(
             'POST',
             '/api/orders',
             [
                 'json' => [
-                    'client' => '/api/clients/' . $client->getId(),
+                    'customer' => '/api/customers/' . $customer->getId(),
                     'items' => []
                 ]
             ]
@@ -89,14 +89,14 @@ class OrderTest extends ApiTestCase
 
     public function testDelete(): void
     {
-        $client = ClientFactory::createOne();
+        $customer = CustomerFactory::createOne();
 
         $response = static::createClient()->request(
             'POST',
             '/api/orders',
             [
                 'json' => [
-                    'client' => '/api/clients/' . $client->getId(),
+                    'customer' => '/api/customers/' . $customer->getId(),
                     'items' => [
                         ['name' => 'Burger XL', 'quantity' => 2, 'pricePerUnit' => 250.2],
                         ['name' => 'Burger XXL', 'quantity' => 1, 'pricePerUnit' => 500.2],
@@ -112,10 +112,10 @@ class OrderTest extends ApiTestCase
 
     public function testUpdate(): void
     {
-        $client = ClientFactory::createOne();
+        $customer = CustomerFactory::createOne();
         $items = OrderItemFactory::createMany(4);
         $order = OrderFactory::createOne([
-            'client' => $client,
+            'customer' => $customer,
             'items' => $items
         ]); 
 
@@ -165,10 +165,10 @@ class OrderTest extends ApiTestCase
 
     public function testUpdateWihtoutItems(): void
     {
-        $client = ClientFactory::createOne();
+        $customer = CustomerFactory::createOne();
         $items = OrderItemFactory::createMany(4);
         $order = OrderFactory::createOne([
-            'client' => $client,
+            'customer' => $customer,
             'items' => $items
         ]); 
 
@@ -192,14 +192,14 @@ class OrderTest extends ApiTestCase
 
     public function testCreateBlankItemName(): void
     {
-        $client = ClientFactory::createOne();
+        $customer = CustomerFactory::createOne();
 
         $response = static::createClient()->request(
             'POST',
             '/api/orders',
             [
                 'json' => [
-                    'client' => '/api/clients/' . $client->getId(),
+                    'customer' => '/api/customers/' . $customer->getId(),
                     'items' => [
                         ['name' => '', 'quantity' => 2, 'pricePerUnit' => 250.2],
                     ]
@@ -213,14 +213,14 @@ class OrderTest extends ApiTestCase
 
     public function testCreateInvalidItemQuantity(): void
     {
-        $client = ClientFactory::createOne();
+        $customer = CustomerFactory::createOne();
 
         $response = static::createClient()->request(
             'POST',
             '/api/orders',
             [
                 'json' => [
-                    'client' => '/api/clients/' . $client->getId(),
+                    'customer' => '/api/customers/' . $customer->getId(),
                     'items' => [
                         ['name' => 'Burger XXL', 'quantity' => 0, 'pricePerUnit' => 250.2],
                     ]
@@ -234,14 +234,14 @@ class OrderTest extends ApiTestCase
 
     public function testCreateInvalidItemPricePerUnit(): void
     {
-        $client = ClientFactory::createOne();
+        $customer = CustomerFactory::createOne();
 
         $response = static::createClient()->request(
             'POST',
             '/api/orders',
             [
                 'json' => [
-                    'client' => '/api/clients/' . $client->getId(),
+                    'customer' => '/api/customers/' . $customer->getId(),
                     'items' => [
                         ['name' => 'Burger XXL', 'quantity' => 1, 'pricePerUnit' => 0],
                     ]
@@ -255,10 +255,10 @@ class OrderTest extends ApiTestCase
 
     public function testUpdateBlankItemName(): void
     {
-        $client = ClientFactory::createOne();
+        $customer = CustomerFactory::createOne();
         $items = OrderItemFactory::createMany(4);
         $order = OrderFactory::createOne([
-            'client' => $client,
+            'customer' => $customer,
             'items' => $items
         ]); 
 
@@ -285,10 +285,10 @@ class OrderTest extends ApiTestCase
 
     public function testUpdateInvalidItemQuanityValue(): void
     {
-        $client = ClientFactory::createOne();
+        $customer = CustomerFactory::createOne();
         $items = OrderItemFactory::createMany(4);
         $order = OrderFactory::createOne([
-            'client' => $client,
+            'customer' => $customer,
             'items' => $items
         ]); 
 
@@ -315,10 +315,10 @@ class OrderTest extends ApiTestCase
 
     public function testUpdateInvalidItemPricePerUnit(): void
     {
-        $client = ClientFactory::createOne();
+        $customer = CustomerFactory::createOne();
         $items = OrderItemFactory::createMany(4);
         $order = OrderFactory::createOne([
-            'client' => $client,
+            'customer' => $customer,
             'items' => $items
         ]); 
 

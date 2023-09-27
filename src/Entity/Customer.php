@@ -3,15 +3,15 @@
 namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
-use App\Repository\ClientRepository;
+use App\Repository\CustomerRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
-#[ORM\Entity(repositoryClass: ClientRepository::class)]
+#[ORM\Entity(repositoryClass: CustomerRepository::class)]
 #[ApiResource]
-class Client
+class Customer
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -37,7 +37,7 @@ class Client
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
 
-    #[ORM\OneToMany(mappedBy: 'client', targetEntity: Order::class)]
+    #[ORM\OneToMany(mappedBy: 'customer', targetEntity: Order::class)]
     private Collection $orders;
 
     public function __construct()
@@ -123,7 +123,7 @@ class Client
     {
         if (!$this->orders->contains($order)) {
             $this->orders->add($order);
-            $order->setClient($this);
+            $order->setCustomer($this);
         }
 
         return $this;
@@ -133,8 +133,8 @@ class Client
     {
         if ($this->orders->removeElement($order)) {
             // set the owning side to null (unless already changed)
-            if ($order->getClient() === $this) {
-                $order->setClient(null);
+            if ($order->getCustomer() === $this) {
+                $order->setCustomer(null);
             }
         }
 
