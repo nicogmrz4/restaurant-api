@@ -9,7 +9,10 @@ use ApiPlatform\Validator\ValidatorInterface;
 class OrderService
 {
 
-    public function __construct(private EntityManagerInterface $em, private ValidatorInterface $validator) {}
+    public function __construct(
+        private EntityManagerInterface $em, 
+        private ValidatorInterface $validator,
+        private AnalyticsRecorderService $analyticsRecSvc) {}
 
     public function create(Order $order): Order 
     {     
@@ -18,6 +21,8 @@ class OrderService
         $this->em->persist($order);
         $this->em->flush();
         
+        $this->analyticsRecSvc->recordTotalOrders();
+
         return $order;
     }
     
