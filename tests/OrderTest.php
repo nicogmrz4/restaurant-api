@@ -342,4 +342,55 @@ class OrderTest extends ApiTestCase
         $this->assertResponseStatusCodeSame(422);
         $this->assertCount(1, $response->toArray(false)['violations']);
     }
+
+    public function testUpdateOrderStatus() {
+        $customer = CustomerFactory::createOne();
+        $items = OrderItemFactory::createMany(4);
+        $order = OrderFactory::createOne([
+            'customer' => $customer,
+            'items' => $items,
+            'status' => 'adsaad'
+        ]);
+
+        $orderUri = '/api/orders/'.$order->getId();
+
+        $response = static::createClient()->request(
+            'PUT',
+            $orderUri.'/status',
+            [
+                'json' => [
+                    'status' => 'pending' 
+                ]
+            ]
+        );
+
+        $this->assertResponseStatusCodeSame(200);
+        $this->assertJsonContains([
+            'status' => 'pending'
+        ]);
+    }
+
+    public function testUpdateOrderStatusWithInvalidStatus() {
+        $customer = CustomerFactory::createOne();
+        $items = OrderItemFactory::createMany(4);
+        $order = OrderFactory::createOne([
+            'customer' => $customer,
+            'items' => $items,
+            'status' => 'adsaad'
+        ]);
+
+        $orderUri = '/api/orders/'.$order->getId();
+
+        $response = static::createClient()->request(
+            'PUT',
+            $orderUri.'/status',
+            [
+                'json' => [
+                    'status' => 'asdfasda'
+                ]
+            ]
+        );
+
+        $this->assertResponseStatusCodeSame(422);
+    }
 }

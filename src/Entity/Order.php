@@ -7,8 +7,12 @@ use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Put;
+use ApiPlatform\OpenApi\Model;
+use App\Controller\OrderStatusController;
 use App\Repository\OrderRepository;
 use App\State\OrderProcessor;
+use ArrayObject;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -22,6 +26,52 @@ use Symfony\Component\Validator\Constraints as Assert;
         new Post(
             processor: OrderProcessor::class,
             denormalizationContext: ['groups' => 'order:post']
+        ),
+        new Put(
+            uriTemplate: '/orders/{id}/status',
+            controller: OrderStatusController::class,
+            requirements: ['id' => '\d+'],
+            write: false,
+            validate: false,
+            status: 200,
+            openapi: new Model\Operation(
+                summary: 'Update order status',
+                requestBody: new Model\RequestBody(
+                    content: new ArrayObject([
+                        'application/json' => [
+                            'schema' => [
+                                'type' => 'object',
+                                'properties' => [
+                                    'status' => ['type' => 'string'],
+                                ]
+                            ],
+                        ]
+                    ])
+                ),
+                // parameters: [
+                //     new Model\Parameter(
+                //         name: 'id',
+                //         required: true,
+                //         description: 'Order identifier',
+                //         in: 'path'
+                //     ),
+                // ],
+                responses: [
+                    '200' => new Model\Response(
+                        description: 'Order status updated',
+                        content: new ArrayObject([
+                            'application/ld+json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'status' => ['type' => 'string'],
+                                    ]
+                                ],
+                            ]
+                        ])
+                    )
+                ]
+            )
         ),
         new GetCollection(
             normalizationContext: ['groups' => 'order:get-collection']

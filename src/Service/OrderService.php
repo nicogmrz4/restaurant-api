@@ -5,9 +5,15 @@ namespace App\Service;
 use App\Entity\Order;
 use Doctrine\ORM\EntityManagerInterface;
 use ApiPlatform\Validator\ValidatorInterface;
+use App\Dto\OrderStatusDTO;
+use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 class OrderService
 {
+    const PEDING_STATUS = 'pending';
+    const DELIVERED_STATUS = 'delivered';
+    const CANCELLED_STATUS = 'cancelled';
+    const AVAILABLE_STATUS = [self::PEDING_STATUS, self::DELIVERED_STATUS, self::CANCELLED_STATUS];
 
     public function __construct(
         private EntityManagerInterface $em, 
@@ -72,6 +78,19 @@ class OrderService
         }
 
         return round($totalPrice, 2);
+    }
+
+    public function updateStatus(Order $order, string $status) {
+        if (!in_array($status, self::AVAILABLE_STATUS)) {
+            throw new UnprocessableEntityHttpException(sprintf('The order status "%s" is unavailable.', $status));
+        }
+
+        $order->setStatus($status);
+
+        $this->em->persist($order);
+        $this->em->flush();
+
+        return new OrderStatusDTO($status);
     }
 
     private function validateItems(Order $order) {
