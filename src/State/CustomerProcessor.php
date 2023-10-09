@@ -15,6 +15,7 @@ class CustomerProcessor implements ProcessorInterface
         private ProcessorInterface $removeProcessor,
         private AnalyticsRecorderService $analyticsRecSvc
     ) {}
+
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): Customer
     {
         if ($operation instanceof DeleteOperationInterface) {

@@ -25,7 +25,7 @@ class Customer
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank()]
     private ?string $firstName = null;
-
+    
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank()]
     private ?string $lastName = null;
@@ -33,7 +33,7 @@ class Customer
     #[ORM\Column]
     #[Assert\GreaterThan(0)]
     private ?int $dni = null;
-
+    
     #[ORM\Column]
     #[Assert\GreaterThan(0)]
     private ?int $phoneNumber = null;
