@@ -4,13 +4,17 @@ namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
 use App\Repository\CustomerRepository;
+use App\State\CustomerProcessor;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: CustomerRepository::class)]
-#[ApiResource(paginationItemsPerPage: 50)]
+#[ApiResource(
+    paginationItemsPerPage: 50,
+    processor: CustomerProcessor::class
+)]
 class Customer
 {
     #[ORM\Id]
@@ -21,7 +25,7 @@ class Customer
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank()]
     private ?string $firstName = null;
-    
+
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank()]
     private ?string $lastName = null;
@@ -29,7 +33,7 @@ class Customer
     #[ORM\Column]
     #[Assert\GreaterThan(0)]
     private ?int $dni = null;
-    
+
     #[ORM\Column]
     #[Assert\GreaterThan(0)]
     private ?int $phoneNumber = null;

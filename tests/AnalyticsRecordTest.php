@@ -26,6 +26,21 @@ class AnalyticsRecordTest extends ApiTestCase
         ]);
     }
 
+    public function testRecordTotalCustomers(): void
+    {
+        for ($i=0; $i < 20; $i++) { 
+            $this->createCustomer();
+        }
+
+        $response = static::createClient()->request('GET', '/api/analytics_recorders/total_customers');
+
+        $this->assertResponseIsSuccessful();
+        $this->assertJsonContains([
+            'value' => 20,
+            'record' => 'total_customers'
+        ]);
+    }
+
     public function createOrder() {
         $customer = CustomerFactory::createOne();
 
@@ -39,6 +54,23 @@ class AnalyticsRecordTest extends ApiTestCase
                         ['name' => 'Burger XL', 'quantity' => 2, 'pricePerUnit' => 250.2],
                         ['name' => 'Burger XXL', 'quantity' => 1, 'pricePerUnit' => 500.2],
                     ]
+                ]
+            ]
+        );
+    }
+
+    public function createCustomer() {
+        $customer = CustomerFactory::createOne();
+
+        static::createClient()->request(
+            'POST',
+            '/api/customers',
+            [
+                'json' => [
+                    'firstName' => 'John',
+                    'lastName' => 'McGregor',
+                    'phoneNumber' => 123456789,
+                    'dni' => 123456789
                 ]
             ]
         );

@@ -29,6 +29,18 @@ class AnalyticsRecorderService
         $this->recordToday(1, $record);
     }
 
+    public function recordTotalCustomers() {
+        $record = $this->getRecordOrCreateIfItNotExist('total_customers');
+
+        $totalOrders = $record->getValue() + 1;
+        $record->setValue($totalOrders);
+
+        $this->em->persist($record);
+        $this->em->flush();
+    
+        $this->recordToday(1, $record);
+    }
+
     public function recordTotalOrdersRevenues(Order $order) {
         $record = $this->getRecordOrCreateIfItNotExist('total_orders_revenues');
 
