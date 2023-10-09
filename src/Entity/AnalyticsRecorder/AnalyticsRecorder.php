@@ -2,8 +2,6 @@
 
 namespace App\Entity\AnalyticsRecorder;
 
-use ApiPlatform\Doctrine\Odm\Filter\SearchFilter;
-use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
 use App\Repository\AnalyticsRecorder\AnalyticsRecorderRepository;
@@ -11,11 +9,22 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use ApiPlatform\Metadata\Get;
-use ApiPlatform\Metadata\Link;
+use ApiPlatform\OpenApi\Model;
 
 #[ORM\Entity(repositoryClass: AnalyticsRecorderRepository::class)]
 #[ApiResource(operations: [
-    new Get()
+    new Get(
+        openapi: new Model\Operation(
+            parameters: [
+                new Model\Parameter(
+                    name: 'record',
+                    in: 'path',
+                    description: 'Record name',
+                    required: true
+                )
+            ]
+        )
+    )
 ])]
 class AnalyticsRecorder
 {
@@ -28,7 +37,7 @@ class AnalyticsRecorder
     #[ORM\Column]
     private ?float $value = null;
 
-    #[ORM\OneToMany(mappedBy: 'analyticsRecorder', targetEntity: AnalyticsRecorderPerDay::class)]
+    #[ORM\OneToMany(mappedBy: 'analyticsRecorder', targetEntity: AnalyticsRecorderPerDay::class, cascade: ['persist', 'remove'])]
     private Collection $perDay;
 
     #[ORM\Column(length: 255)]

@@ -90,6 +90,10 @@ class OrderService
         $this->em->persist($order);
         $this->em->flush();
 
+        if ($status === self::DELIVERED_STATUS) {
+            $this->analyticsRecSvc->recordTotalOrdersRevenues($order);
+        }
+
         return new OrderStatusDTO($status);
     }
 

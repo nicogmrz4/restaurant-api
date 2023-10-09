@@ -17,10 +17,16 @@ class AnalyticsRecorderPerDay
     private ?float $value = null;
 
     #[ORM\Column]
-    private ?\DateTimeImmutable $createdAt = null;
+    private ?\DateTimeImmutable $createdAt;
 
     #[ORM\ManyToOne(inversedBy: 'perDay')]
     private ?AnalyticsRecorder $analyticsRecorder = null;
+
+    public function __construct()  
+    {
+        $today = (new \DateTimeImmutable())->setTime(0, 0);
+        $this->createdAt = $today;
+    }
 
     public function getId(): ?int
     {
