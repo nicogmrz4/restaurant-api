@@ -45,12 +45,12 @@ class CustomerTest extends ApiTestCase
                 '@id' => '/api/customers?page=1',
                 '@type' => 'hydra:PartialCollectionView',
                 'hydra:first' => '/api/customers?page=1',
-                'hydra:last' => '/api/customers?page=4',
+                'hydra:last' => '/api/customers?page=2',
                 'hydra:next' => '/api/customers?page=2'
             ]
         ]);
 
-        $this->assertCount(30, $response->toArray()['hydra:member']);
+        $this->assertCount(50, $response->toArray()['hydra:member']);
     }
 
     public function testCreate(): void
