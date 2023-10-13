@@ -8,40 +8,49 @@ use App\State\CustomerProcessor;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: CustomerRepository::class)]
 #[ApiResource(
     paginationItemsPerPage: 50,
-    processor: CustomerProcessor::class
+    processor: CustomerProcessor::class,
+    normalizationContext: ['groups' => 'customer:read'], 
+    denormalizationContext: ['groups' => 'customer:write'] 
 )]
 class Customer
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['customer:read'])]
     private ?int $id = null;
-
+    
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank()]
+    #[Groups(['customer:read', 'customer:write'])]
     private ?string $firstName = null;
     
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank()]
+    #[Groups(['customer:read', 'customer:write'])]
     private ?string $lastName = null;
-
+    
     #[ORM\Column]
     #[Assert\GreaterThan(0)]
+    #[Groups(['customer:read', 'customer:write'])]
     private ?int $dni = null;
     
     #[ORM\Column]
     #[Assert\GreaterThan(0)]
+    #[Groups(['customer:read', 'customer:write'])]
     private ?int $phoneNumber = null;
-
+    
     #[ORM\Column]
+    #[Groups(['customer:read'])]
     private ?\DateTimeImmutable $createdAt = null;
-
-    #[ORM\OneToMany(mappedBy: 'customer', targetEntity: Order::class)]
+    
+    #[ORM\OneToMany(mappedBy: 'customer', targetEntity: Order::class,  cascade: ['persist', 'remove'])]
     private Collection $orders;
 
     public function __construct()
@@ -103,16 +112,16 @@ class Customer
         return $this;
     }
 
-    public function getCreatedAt(): ?\DateTimeImmutable
-    {
-        return $this->createdAt;
-    }
-
     public function setCreatedAt(\DateTimeImmutable $createdAt): static
     {
         $this->createdAt = $createdAt;
 
         return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTimeImmutable
+    {
+        return $this->createdAt;
     }
 
     /**
@@ -123,25 +132,25 @@ class Customer
         return $this->orders;
     }
 
-    public function addOrder(Order $order): static
-    {
-        if (!$this->orders->contains($order)) {
-            $this->orders->add($order);
-            $order->setCustomer($this);
-        }
+    // public function addOrder(Order $order): static
+    // {
+    //     if (!$this->orders->contains($order)) {
+    //         $this->orders->add($order);
+    //         $order->setCustomer($this);
+    //     }
 
-        return $this;
-    }
+    //     return $this;
+    // }
 
-    public function removeOrder(Order $order): static
-    {
-        if ($this->orders->removeElement($order)) {
-            // set the owning side to null (unless already changed)
-            if ($order->getCustomer() === $this) {
-                $order->setCustomer(null);
-            }
-        }
+    // public function removeOrder(Order $order): static
+    // {
+    //     if ($this->orders->removeElement($order)) {
+    //         // set the owning side to null (unless already changed)
+    //         if ($order->getCustomer() === $this) {
+    //             $order->setCustomer(null);
+    //         }
+    //     }
 
-        return $this;
-    }
+    //     return $this;
+    // }
 }
