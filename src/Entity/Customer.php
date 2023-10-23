@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
+use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
 use App\Repository\CustomerRepository;
 use App\State\CustomerProcessor;
@@ -18,6 +20,7 @@ use Symfony\Component\Validator\Constraints as Assert;
     normalizationContext: ['groups' => 'customer:read'], 
     denormalizationContext: ['groups' => 'customer:write'] 
 )]
+#[ApiFilter(SearchFilter::class, properties: ['dni' => 'exact'])]
 class Customer
 {
     #[ORM\Id]
