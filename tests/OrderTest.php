@@ -4,6 +4,7 @@ namespace App\Tests;
 
 use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
 use App\Factory\CustomerFactory;
+use App\Factory\FoodFactory;
 use App\Factory\OrderFactory;
 use App\Factory\OrderItemFactory;
 use Zenstruck\Foundry\Test\Factories;
@@ -41,6 +42,8 @@ class OrderTest extends ApiTestCase
     public function testCreate(): void
     {
         $customer = CustomerFactory::createOne();
+        $food1 = FoodFactory::randomOrCreate();
+        $food2 = FoodFactory::randomOrCreate();
 
         $response = static::createClient()->request(
             'POST',
@@ -49,8 +52,8 @@ class OrderTest extends ApiTestCase
                 'json' => [
                     'customer' => '/api/customers/' . $customer->getId(),
                     'items' => [
-                        ['name' => 'Burger XL', 'quantity' => 2, 'pricePerUnit' => 250.2],
-                        ['name' => 'Burger XXL', 'quantity' => 1, 'pricePerUnit' => 500.2],
+                        ['food' => '/api/foods/'.$food1->getId(), 'quantity' => 2],
+                        ['food' => '/api/foods/'.$food2->getId(), 'quantity' => 1],
                     ]
                 ]
             ]
@@ -60,7 +63,7 @@ class OrderTest extends ApiTestCase
         $this->assertResponseHeaderSame('content-type', 'application/ld+json; charset=utf-8');
         $this->assertJsonContains([
             'totalItems' => 3,
-            'totalPrice' => 1000.6,
+            'totalPrice' => round(($food1->getPrice() * 2) + $food2->getPrice(), 2),
             'status' => 'pending'
         ]);
         $responseAsArray = $response->toArray();
@@ -90,6 +93,8 @@ class OrderTest extends ApiTestCase
     public function testDelete(): void
     {
         $customer = CustomerFactory::createOne();
+        $food1 = FoodFactory::randomOrCreate();
+        $food2 = FoodFactory::randomOrCreate();
 
         $response = static::createClient()->request(
             'POST',
@@ -98,8 +103,8 @@ class OrderTest extends ApiTestCase
                 'json' => [
                     'customer' => '/api/customers/' . $customer->getId(),
                     'items' => [
-                        ['name' => 'Burger XL', 'quantity' => 2, 'pricePerUnit' => 250.2],
-                        ['name' => 'Burger XXL', 'quantity' => 1, 'pricePerUnit' => 500.2],
+                        ['food' => '/api/foods/'.$food1->getId(), 'quantity' => 2],
+                        ['food' => '/api/foods/'.$food2->getId(), 'quantity' => 1],
                     ]
                 ]
             ]
@@ -110,238 +115,13 @@ class OrderTest extends ApiTestCase
         $this->assertResponseStatusCodeSame(204);
     }
 
-    public function testUpdate(): void
+    public function testDeleteNotFound(): void
     {
-        $customer = CustomerFactory::createOne();
-        $items = OrderItemFactory::createMany(4);
-        $order = OrderFactory::createOne([
-            'customer' => $customer,
-            'items' => $items
-        ]); 
-
-        $orderUri = '/api/orders/'.$order->getId().'/items';
-        
-        $response = static::createClient()->request(
-            'PATCH',
-            $orderUri,
-            [
-                'json' => [
-                    'items' => [
-                        ['name' => 'Burger SM', 'quantity' => 5, 'pricePerUnit' => 500],
-                        ['name' => 'Burger XXL', 'quantity' => 2, 'pricePerUnit' => 1000.25],
-                    ]
-                ],
-                'headers' => [
-                    'Content-Type' => 'application/merge-patch+json'
-                ]
-            ]
-        );
-        $this->assertResponseIsSuccessful();
-        $this->assertJsonContains([
-            'totalItems' => 7,
-            'totalPrice' => 4500.5
-        ]);
-        $responseItems = $response->toArray()['items'];
-        $this->assertCount(2, $responseItems);
-        
-        $expectedItems = [
-            ['name' => 'Burger SM', 'quantity' => 5, 'pricePerUnit' => 500],
-            ['name' => 'Burger XXL', 'quantity' => 2, 'pricePerUnit' => 1000.25],
-        ];
-
-        $assertsCount = 0;
-
-        foreach ($responseItems as $resKey => $responseItem) {
-            foreach ($expectedItems as $expeKey => $expectedItem) {
-                foreach ($expectedItem as $key => $value) {
-                    if ($responseItem[$key] == $value) $assertsCount++;
-                    else break;
-                }
-            }
-        }
-        
-        $this->assertTrue($assertsCount === 6, 'Some properties hasn\'t been updated');
+        $response = static::createClient()
+            ->request('DELETE', '/api/orders/2231233');
+        $this->assertResponseStatusCodeSame(404);
     }
 
-    public function testUpdateWihtoutItems(): void
-    {
-        $customer = CustomerFactory::createOne();
-        $items = OrderItemFactory::createMany(4);
-        $order = OrderFactory::createOne([
-            'customer' => $customer,
-            'items' => $items
-        ]); 
-
-        $orderUri = '/api/orders/'.$order->getId().'/items';
-        
-        $response = static::createClient()->request(
-            'PATCH',
-            $orderUri,
-            [
-                'json' => [
-                    'items' => []
-                ],
-                'headers' => [
-                    'Content-Type' => 'application/merge-patch+json'
-                ]
-            ]
-        );
-        $this->assertResponseStatusCodeSame(422);
-        $this->assertCount(1, $response->toArray(false)['violations']);
-    }
-
-    public function testCreateBlankItemName(): void
-    {
-        $customer = CustomerFactory::createOne();
-
-        $response = static::createClient()->request(
-            'POST',
-            '/api/orders',
-            [
-                'json' => [
-                    'customer' => '/api/customers/' . $customer->getId(),
-                    'items' => [
-                        ['name' => '', 'quantity' => 2, 'pricePerUnit' => 250.2],
-                    ]
-                ]
-            ]
-        );
-
-        $this->assertResponseStatusCodeSame(422);
-        $this->assertCount(1, $response->toArray(false)['violations']);
-    }
-
-    public function testCreateInvalidItemQuantity(): void
-    {
-        $customer = CustomerFactory::createOne();
-
-        $response = static::createClient()->request(
-            'POST',
-            '/api/orders',
-            [
-                'json' => [
-                    'customer' => '/api/customers/' . $customer->getId(),
-                    'items' => [
-                        ['name' => 'Burger XXL', 'quantity' => 0, 'pricePerUnit' => 250.2],
-                    ]
-                ]
-            ]
-        );
-
-        $this->assertResponseStatusCodeSame(422);
-        $this->assertCount(1, $response->toArray(false)['violations']);
-    }
-
-    public function testCreateInvalidItemPricePerUnit(): void
-    {
-        $customer = CustomerFactory::createOne();
-
-        $response = static::createClient()->request(
-            'POST',
-            '/api/orders',
-            [
-                'json' => [
-                    'customer' => '/api/customers/' . $customer->getId(),
-                    'items' => [
-                        ['name' => 'Burger XXL', 'quantity' => 1, 'pricePerUnit' => 0],
-                    ]
-                ]
-            ]
-        );
-
-        $this->assertResponseStatusCodeSame(422);
-        $this->assertCount(1, $response->toArray(false)['violations']);
-    }
-
-    public function testUpdateBlankItemName(): void
-    {
-        $customer = CustomerFactory::createOne();
-        $items = OrderItemFactory::createMany(4);
-        $order = OrderFactory::createOne([
-            'customer' => $customer,
-            'items' => $items
-        ]); 
-
-        $orderUri = '/api/orders/'.$order->getId().'/items';
-        
-        $response = static::createClient()->request(
-            'PATCH',
-            $orderUri,
-            [
-                'json' => [
-                    'items' => [
-                        ['name' => 'Burger SM', 'quantity' => 5, 'pricePerUnit' => 500],
-                        ['name' => '', 'quantity' => 2, 'pricePerUnit' => 1000.25],
-                    ]
-                ],
-                'headers' => [
-                    'Content-Type' => 'application/merge-patch+json'
-                ]
-            ]
-        );
-        $this->assertResponseStatusCodeSame(422);
-        $this->assertCount(1, $response->toArray(false)['violations']);
-    }
-
-    public function testUpdateInvalidItemQuanityValue(): void
-    {
-        $customer = CustomerFactory::createOne();
-        $items = OrderItemFactory::createMany(4);
-        $order = OrderFactory::createOne([
-            'customer' => $customer,
-            'items' => $items
-        ]); 
-
-        $orderUri = '/api/orders/'.$order->getId().'/items';
-        
-        $response = static::createClient()->request(
-            'PATCH',
-            $orderUri,
-            [
-                'json' => [
-                    'items' => [
-                        ['name' => 'Burger SM', 'quantity' => 5, 'pricePerUnit' => 500],
-                        ['name' => 'Burger XXL', 'quantity' => 0, 'pricePerUnit' => 1000.25],
-                    ]
-                ],
-                'headers' => [
-                    'Content-Type' => 'application/merge-patch+json'
-                ]
-            ]
-        );
-        $this->assertResponseStatusCodeSame(422);
-        $this->assertCount(1, $response->toArray(false)['violations']);
-    }
-
-    public function testUpdateInvalidItemPricePerUnit(): void
-    {
-        $customer = CustomerFactory::createOne();
-        $items = OrderItemFactory::createMany(4);
-        $order = OrderFactory::createOne([
-            'customer' => $customer,
-            'items' => $items
-        ]); 
-
-        $orderUri = '/api/orders/'.$order->getId().'/items';
-        
-        $response = static::createClient()->request(
-            'PATCH',
-            $orderUri,
-            [
-                'json' => [
-                    'items' => [
-                        ['name' => 'Burger SM', 'quantity' => 5, 'pricePerUnit' => 500],
-                        ['name' => 'Burger XXL', 'quantity' => 1, 'pricePerUnit' => -1000.25],
-                    ]
-                ],
-                'headers' => [
-                    'Content-Type' => 'application/merge-patch+json'
-                ]
-            ]
-        );
-        $this->assertResponseStatusCodeSame(422);
-        $this->assertCount(1, $response->toArray(false)['violations']);
-    }
 
     public function testUpdateOrderStatus() {
         $customer = CustomerFactory::createOne();

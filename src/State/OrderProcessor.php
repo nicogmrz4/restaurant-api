@@ -15,11 +15,6 @@ class OrderProcessor implements ProcessorInterface
 
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): Order
     {
-        if ($context["operation"] instanceof Patch) {
-            $order = $this->orderService->updateQuantitiesAndPersist($data);
-            return $order;
-        }
-
         $order = $this->orderService->create($data);
 
         return $order;

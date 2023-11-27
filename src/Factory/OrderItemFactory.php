@@ -47,7 +47,7 @@ final class OrderItemFactory extends ModelFactory
     protected function getDefaults(): array
     {
         return [
-            'name' => self::faker()->sentence(2),
+            'food' => FoodFactory::randomOrCreate(),
             'pricePerUnit' => self::faker()->randomFloat(2, 100, 1000),
             'quantity' => self::faker()->randomNumber(1),
         ];

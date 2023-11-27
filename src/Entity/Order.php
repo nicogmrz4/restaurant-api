@@ -5,10 +5,12 @@ namespace App\Entity;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\GetCollection;
-use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\Link;
 use ApiPlatform\OpenApi\Model;
+use App\Controller\OrderItemsController;
 use App\Controller\OrderStatusController;
 use App\Repository\OrderRepository;
 use App\State\OrderProcessor;
@@ -77,12 +79,6 @@ use Symfony\Component\Validator\Constraints as Assert;
             normalizationContext: ['groups' => 'order:get-collection']
         ),
         new Delete(),
-        new Patch(
-            uriTemplate: '/orders/{id}/items',
-            requirements: ['id' => '\d+'],
-            processor: OrderProcessor::class,
-            denormalizationContext: ['groups' => 'order-items:patch']
-        )
     ]
 )]
 class Order
@@ -97,14 +93,14 @@ class Order
     private ?Customer $customer = null;
 
     #[ORM\Column]
-    #[Groups(['order:get-collection'])]
+    #[Groups(['order:get-collection'])] 
     private ?float $totalPrice = null;
 
     #[ORM\Column]
     #[Groups(['order:get-collection'])]
     private ?int $totalItems = null;
 
-    #[ORM\OneToMany(mappedBy: 'owner', targetEntity: OrderItem::class, cascade: ['persist', 'remove'])]
+    #[ORM\OneToMany(mappedBy: 'order', targetEntity: OrderItem::class, cascade: ['persist', 'remove'])]
     #[Groups(['order:post', 'order-items:patch'])]
     #[Assert\Count(min: 1)]
     private Collection $items;
@@ -177,7 +173,7 @@ class Order
     {
         if (!$this->items->contains($item)) {
             $this->items->add($item);
-            $item->setOwner($this);
+            $item->setOrder($this);
         }
 
         return $this;
@@ -187,8 +183,8 @@ class Order
     {
         if ($this->items->removeElement($item)) {
             // set the owning side to null (unless already changed)
-            if ($item->getOwner() === $this) {
-                $item->setOwner(null);
+            if ($item->getOrder() === $this) {
+                $item->setOrder(null);
             }
         }
 

@@ -2,12 +2,34 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Delete;
 use App\Repository\OrderItemRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Link;
+use ApiPlatform\Metadata\Post;
+use App\State\OrderItemProcessor;
 
 #[ORM\Entity(repositoryClass: OrderItemRepository::class)]
+#[ApiResource(
+    operations: [
+        new Delete(),
+        new Post(
+            denormalizationContext: ['groups' => 'order-item:post'],
+            processor: OrderItemProcessor::class
+        )
+    ],
+)]
+#[ApiResource(
+    uriTemplate: '/orders/{orderId}/items',
+    uriVariables: [
+        'orderId' => new Link(fromClass: Order::class, toProperty: 'order'),
+    ],
+    operations: [ new GetCollection() ]
+)]
 class OrderItem
 {
     #[ORM\Id]
@@ -16,50 +38,35 @@ class OrderItem
     private ?int $id = null;
     
     #[ORM\ManyToOne(inversedBy: 'items')]
-    private ?Order $owner = null;
-    
-    #[ORM\Column(length: 255)]
-    #[Groups(['order:post', 'order-items:patch'])]
-    #[Assert\NotBlank]
-    private ?string $name = null;
+    #[Groups(['order-item:post'])]
+    private ?Order $order = null;
     
     #[ORM\Column]
-    #[Groups(['order:post', 'order-items:patch'])]
     #[Assert\GreaterThan(0)]
     #[Assert\Type('integer')]
+    #[Groups(['order:post', 'order-items:patch', 'order-item:post'])]
     private ?int $quantity = null;
     
     #[ORM\Column]
-    #[Groups(['order:post', 'order-items:patch'])]
-    #[Assert\GreaterThan(0)]
-    #[Assert\Type('float')]
     private ?float $pricePerUnit = null;
-
+    
+    #[ORM\ManyToOne]
+    #[Groups(['order:post', 'order-items:patch', 'order-item:post'])]
+    private ?Food $food = null;
+    
     public function getId(): ?int
     {
         return $this->id;
     }
-
-    public function getOwner(): ?Order
+    
+    public function getOrder(): ?Order
     {
-        return $this->owner;
+        return $this->order;
     }
-
-    public function setOwner(?Order $owner): static
+    
+    public function setOrder(?Order $order): static
     {
-        $this->owner = $owner;
-
-        return $this;
-    }
-
-    public function getName(): ?string
-    {
-        return $this->name;
-    }
-
-    public function setName(string $name): static
-    {
-        $this->name = $name;
+        $this->order = $order;
 
         return $this;
     }
@@ -84,6 +91,18 @@ class OrderItem
     public function setPricePerUnit(float $pricePerUnit): static
     {
         $this->pricePerUnit = $pricePerUnit;
+
+        return $this;
+    }
+
+    public function getFood(): ?Food
+    {
+        return $this->food;
+    }
+
+    public function setFood(?Food $food): static
+    {
+        $this->food = $food;
 
         return $this;
     }

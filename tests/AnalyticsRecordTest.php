@@ -4,6 +4,7 @@ namespace App\Tests;
 
 use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
 use App\Factory\CustomerFactory;
+use App\Service\AnalyticsRecorderService;
 use Zenstruck\Foundry\Test\Factories;
 use Zenstruck\Foundry\Test\ResetDatabase;
 
@@ -13,11 +14,14 @@ class AnalyticsRecordTest extends ApiTestCase
 
     public function testRecordTotalOrders(): void
     {
+        $container = $this->getContainer();
+        $analyticsRecordsSvc = $container->get(AnalyticsRecorderService::class);
+
         for ($i=0; $i < 20; $i++) { 
-            $this->createOrder();
+            $analyticsRecordsSvc->recordTotalOrders();
         }
 
-        $response = static::createClient()->request('GET', '/api/analytics_recorders/total_orders');
+        $this->createClient()->request('GET', '/api/analytics_recorders/total_orders');
 
         $this->assertResponseIsSuccessful();
         $this->assertJsonContains([
@@ -28,51 +32,19 @@ class AnalyticsRecordTest extends ApiTestCase
 
     public function testRecordTotalCustomers(): void
     {
-        for ($i=0; $i < 20; $i++) { 
-            $this->createCustomer();
-        }
+        $container = $this->getContainer();
+        $analyticsRecordsSvc = $container->get(AnalyticsRecorderService::class);
 
-        $response = static::createClient()->request('GET', '/api/analytics_recorders/total_customers');
+        for ($i=0; $i < 20; $i++) { 
+            $analyticsRecordsSvc->recordTotalCustomers();
+        }
+        
+        static::createClient()->request('GET', '/api/analytics_recorders/total_customers');
 
         $this->assertResponseIsSuccessful();
         $this->assertJsonContains([
             'value' => 20,
             'record' => 'total_customers'
         ]);
-    }
-
-    public function createOrder() {
-        $customer = CustomerFactory::createOne();
-
-        static::createClient()->request(
-            'POST',
-            '/api/orders',
-            [
-                'json' => [
-                    'customer' => '/api/customers/' . $customer->getId(),
-                    'items' => [
-                        ['name' => 'Burger XL', 'quantity' => 2, 'pricePerUnit' => 250.2],
-                        ['name' => 'Burger XXL', 'quantity' => 1, 'pricePerUnit' => 500.2],
-                    ]
-                ]
-            ]
-        );
-    }
-
-    public function createCustomer() {
-        $customer = CustomerFactory::createOne();
-
-        static::createClient()->request(
-            'POST',
-            '/api/customers',
-            [
-                'json' => [
-                    'firstName' => 'John',
-                    'lastName' => 'McGregor',
-                    'phoneNumber' => 123456789,
-                    'dni' => 123456789
-                ]
-            ]
-        );
     }
 }

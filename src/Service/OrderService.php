@@ -6,6 +6,7 @@ use App\Entity\Order;
 use Doctrine\ORM\EntityManagerInterface;
 use ApiPlatform\Validator\ValidatorInterface;
 use App\Dto\OrderStatusDTO;
+use App\Entity\OrderItem;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 class OrderService
@@ -23,7 +24,13 @@ class OrderService
     public function create(Order $order): Order 
     {     
         $this->validateItems($order);
-        $order = $this->updateQuantities($order);
+        
+        $orderItems = $order->getItems();
+        $orderItems->map(function($item) {
+            return $item->setPricePerUnit($item->getFood()->getPrice());
+        });
+
+        $order = $this->updateTotalItemsAndTotalPrice($order);
         $this->em->persist($order);
         $this->em->flush();
         
@@ -32,7 +39,7 @@ class OrderService
         return $order;
     }
     
-    public function updateQuantities(Order $order): Order {
+    public function updateTotalItemsAndTotalPrice(Order $order): Order {
         $totalItems = $this->countTotalItems($order);
         $totalPrice = $this->calcTotalPrice($order);
         $order->setTotalItems($totalItems);
@@ -40,9 +47,8 @@ class OrderService
         
         return $order;
     }
-    
-    public function updateQuantitiesAndPersist(Order $order): Order {
-        $this->validateItems($order);
+
+    public function updateTotalItemsAndTotalPriceAndPersist(Order $order): Void {
         $totalItems = $this->countTotalItems($order);
         $totalPrice = $this->calcTotalPrice($order);
         $order->setTotalItems($totalItems);
@@ -50,8 +56,6 @@ class OrderService
         
         $this->em->persist($order);
         $this->em->flush();
-
-        return $order;
     }
 
     private function countTotalItems(Order $order): int
@@ -67,6 +71,7 @@ class OrderService
         return $itemsCount;
     }
 
+    
     private function calcTotalPrice(Order $order): float 
     {
         $totalPrice = 0.0;
