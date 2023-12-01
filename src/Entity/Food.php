@@ -35,16 +35,17 @@ class Food
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['groups' => "order-item:get-collection"])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['food:read', 'food:write'])]
+    #[Groups(['food:read', 'food:write', "order-item:get-collection"])]
     private ?string $name = null;
 
     #[ORM\Column]
-    #[Groups(['food:read', 'food:write'])]
+    #[Groups(['food:read', 'food:write', "order-item:get-collection"])]
     private ?float $price = null;
-
+    
     public function getId(): ?int
     {
         return $this->id;

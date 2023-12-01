@@ -28,13 +28,16 @@ use App\State\OrderItemProcessor;
     uriVariables: [
         'orderId' => new Link(fromClass: Order::class, toProperty: 'order'),
     ],
-    operations: [ new GetCollection() ]
+    operations: [ new GetCollection(
+        normalizationContext: ['groups' => "order-item:get-collection"]
+    ) ]
 )]
 class OrderItem
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['groups' => "order-item:get-collection"])]
     private ?int $id = null;
     
     #[ORM\ManyToOne(inversedBy: 'items')]
@@ -44,14 +47,15 @@ class OrderItem
     #[ORM\Column]
     #[Assert\GreaterThan(0)]
     #[Assert\Type('integer')]
-    #[Groups(['order:post', 'order-items:patch', 'order-item:post'])]
+    #[Groups(['order:post', 'order-items:patch', 'order-item:post', 'order-item:get-collection'])]
     private ?int $quantity = null;
     
     #[ORM\Column]
+    #[Groups(['groups' => "order-item:get-collection"])]
     private ?float $pricePerUnit = null;
     
     #[ORM\ManyToOne]
-    #[Groups(['order:post', 'order-items:patch', 'order-item:post'])]
+    #[Groups(['order:post', 'order-items:patch', 'order-item:post', 'order-item:get-collection'])]
     private ?Food $food = null;
     
     public function getId(): ?int
