@@ -27,7 +27,8 @@ use Symfony\Component\Validator\Constraints as Assert;
     operations: [
         new Post(
             processor: OrderProcessor::class,
-            denormalizationContext: ['groups' => 'order:post']
+            denormalizationContext: ['groups' => 'order:post'],
+	    normalizationContext: ['groups' => 'order:get-collection']
         ),
         new Put(
             uriTemplate: '/orders/{id}/status',
@@ -76,6 +77,7 @@ use Symfony\Component\Validator\Constraints as Assert;
             )
         ),
         new GetCollection(
+	    order: ['id' => 'desc'],
             normalizationContext: ['groups' => 'order:get-collection']
         ),
         new Delete(),
@@ -86,6 +88,7 @@ class Order
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['order:get-collection'])] 
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'orders')]
