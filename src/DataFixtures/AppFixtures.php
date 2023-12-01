@@ -6,6 +6,7 @@ use App\Entity\OrderItem;
 use App\Factory\CustomerFactory;
 use App\Factory\FoodFactory;
 use App\Factory\OrderFactory;
+use App\Story\OrdersStory;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 
@@ -50,5 +51,7 @@ class AppFixtures extends Fixture
             'name' => 'Soda 600ml',
             'price' => 199.99
         ]);
+
+        OrdersStory::load();
     }
 }
