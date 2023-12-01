@@ -16,4 +16,5 @@ WORKDIR /home/app
 
 EXPOSE 8000
 
-CMD [ "symfony", "serve" ]
+CMD symfony server:start || symfony server:stop && symfony server:start
+
