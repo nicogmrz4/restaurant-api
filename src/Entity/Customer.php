@@ -26,31 +26,31 @@ class Customer
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['customer:read'])]
+    #[Groups(['customer:read', "order:get-collection"])]
     private ?int $id = null;
     
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank()]
-    #[Groups(['customer:read', 'customer:write'])]
+    #[Groups(['customer:read', 'customer:write', "order:get-collection"])]
     private ?string $firstName = null;
     
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank()]
-    #[Groups(['customer:read', 'customer:write'])]
+    #[Groups(['customer:read', 'customer:write', "order:get-collection"])]
     private ?string $lastName = null;
     
     #[ORM\Column]
     #[Assert\GreaterThan(0)]
-    #[Groups(['customer:read', 'customer:write'])]
+    #[Groups(['customer:read', 'customer:write', "order:get-collection"])]
     private ?int $dni = null;
     
     #[ORM\Column]
     #[Assert\GreaterThan(0)]
-    #[Groups(['customer:read', 'customer:write'])]
+    #[Groups(['customer:read', 'customer:write', "order:get-collection"])]
     private ?int $phoneNumber = null;
     
     #[ORM\Column]
-    #[Groups(['customer:read'])]
+    #[Groups(['customer:read', "order:get-collection"])]
     private ?\DateTimeImmutable $createdAt = null;
     
     #[ORM\OneToMany(mappedBy: 'customer', targetEntity: Order::class,  cascade: ['persist', 'remove'])]

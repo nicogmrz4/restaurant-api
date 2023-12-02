@@ -35,7 +35,7 @@ class Food
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['groups' => "order-item:get-collection"])]
+    #[Groups(['food:read', "order-item:get-collection"])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
