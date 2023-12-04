@@ -5,9 +5,9 @@ services:
       context: .
       dockerfile: Dockerfile.dev
     ports:
-      - "8000:8000"
+      - "8000:80"
     volumes:
-      - .:/home/app
+      - .:/var/www/html
     links:
       - db
 
