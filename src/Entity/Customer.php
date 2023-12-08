@@ -39,15 +39,15 @@ class Customer
     #[Groups(['customer:read', 'customer:write', "order:get-collection"])]
     private ?string $lastName = null;
     
-    #[ORM\Column]
-    #[Assert\GreaterThan(0)]
+    #[ORM\Column(length: 15)]
+    #[Assert\NotBlank()]
     #[Groups(['customer:read', 'customer:write', "order:get-collection"])]
-    private ?int $dni = null;
+    private ?string $dni = null;
     
-    #[ORM\Column]
-    #[Assert\GreaterThan(0)]
+    #[ORM\Column(length: 50)]
+    #[Assert\NotBlank()]
     #[Groups(['customer:read', 'customer:write', "order:get-collection"])]
-    private ?int $phoneNumber = null;
+    private ?string $phoneNumber = null;
     
     #[ORM\Column]
     #[Groups(['customer:read', "order:get-collection"])]
@@ -91,24 +91,24 @@ class Customer
         return $this;
     }
 
-    public function getDni(): ?int
+    public function getDni(): ?string
     {
         return $this->dni;
     }
 
-    public function setDni(int $dni): static
+    public function setDni(string $dni): static
     {
         $this->dni = $dni;
 
         return $this;
     }
 
-    public function getPhoneNumber(): ?int
+    public function getPhoneNumber(): ?string
     {
         return $this->phoneNumber;
     }
 
-    public function setPhoneNumber(int $phoneNumber): static
+    public function setPhoneNumber(string $phoneNumber): static
     {
         $this->phoneNumber = $phoneNumber;
 

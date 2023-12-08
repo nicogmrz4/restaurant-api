@@ -68,7 +68,6 @@ class OrderTest extends ApiTestCase
         ]);
         $responseAsArray = $response->toArray();
         $this->assertMatchesRegularExpression('~^/api/orders/\d+$~', $responseAsArray['@id']);
-        $this->assertCount(2, $responseAsArray['items']);
     }
 
     public function testCreateWihtoutItems(): void

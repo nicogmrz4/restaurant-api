@@ -12,12 +12,13 @@ class CustomerTest extends ApiTestCase
 {
     use ResetDatabase, Factories;
 
-    public function getDefaultClientAsArray(array $atributes = []) {
+    public function getDefaultClientAsArray(array $atributes = [])
+    {
         $customerAsArray = [
             'firstName' => 'John',
             'lastName' => 'McGregor',
-            'phoneNumber' => 123456789,
-            'dni' => 123456789
+            'phoneNumber' => '123456789',
+            'dni' => '123456789'
         ];
 
         foreach ($atributes as $attr => $value) {
@@ -66,25 +67,22 @@ class CustomerTest extends ApiTestCase
             '@type' => 'Customer',
             'firstName' => 'John',
             'lastName' => 'McGregor',
-            'phoneNumber' => 123456789,
-            'dni' => 123456789
+            'phoneNumber' => '123456789',
+            'dni' => '123456789'
         ]);
         $this->assertMatchesRegularExpression('~^/api/customers/\d+$~', $response->toArray()['@id']);
     }
 
     public function testUpdateDni(): void
     {
-        CustomerFactory::createOne([
-            'dni' => 123456789
-        ]);
-
-        $customerIri = $this->findIriBy(Customer::class, ['dni' => '123456789']);
+        $customer = CustomerFactory::createOne();
+        $customerIri = $this->findIriBy(Customer::class, ['id' => $customer->getId()]);
 
         $httpClient = static::createClient();
 
         $httpClient->request('PATCH', $customerIri, [
             'json' => [
-                'dni' => 987654321
+                'dni' => '987654321'
             ],
             'headers' => [
                 'Content-Type' => 'application/merge-patch+json',
@@ -94,17 +92,14 @@ class CustomerTest extends ApiTestCase
         $this->assertResponseIsSuccessful();
         $this->assertJsonContains([
             '@id' => $customerIri,
-            'dni' => 987654321
+            'dni' => '987654321'
         ]);
     }
 
     public function testUpdateFirstName(): void
     {
-        CustomerFactory::createOne([
-            'firstName' => 'Marcos'
-        ]);
-
-        $customerIri = $this->findIriBy(Customer::class, ['firstName' => 'Marcos']);
+        $customer = CustomerFactory::createOne();
+        $customerIri = $this->findIriBy(Customer::class, ['id' => $customer->getId()]);
 
         $httpClient = static::createClient();
         $httpClient->request('PATCH', $customerIri, [
@@ -125,14 +120,11 @@ class CustomerTest extends ApiTestCase
 
     public function testUpdateLastName(): void
     {
-        CustomerFactory::createOne([
-            'lastName' => 'Garcia'
-        ]);
-
-        $customerIri = $this->findIriBy(Customer::class, ['lastName' => 'Garcia']);
+        $customer = CustomerFactory::createOne();
+        $customerIri = $this->findIriBy(Customer::class, ['id' => $customer->getId()]);
 
         $httpClient = static::createClient();
-        
+
         $httpClient->request('PATCH', $customerIri, [
             'json' => [
                 'lastName' => 'Guitierrez'
@@ -151,17 +143,14 @@ class CustomerTest extends ApiTestCase
 
     public function testUpdatePhoneNumber(): void
     {
-        CustomerFactory::createOne([
-            'phoneNumber' => 44446666
-        ]);
-
-        $customerIri = $this->findIriBy(Customer::class, ['phoneNumber' => 44446666]);
+        $customer = CustomerFactory::createOne();
+        $customerIri = $this->findIriBy(Customer::class, ['id' => $customer->getId()]);
 
         $httpClient = static::createClient();
-        
-        $httpClient->request('PATCH', $customerIri,[
+
+        $httpClient->request('PATCH', $customerIri, [
             'json' => [
-                'phoneNumber' => 99991111
+                'phoneNumber' => '99991111'
             ],
             'headers' => [
                 'Content-Type' => 'application/merge-patch+json',
@@ -171,33 +160,53 @@ class CustomerTest extends ApiTestCase
         $this->assertResponseIsSuccessful();
         $this->assertJsonContains([
             '@id' => $customerIri,
-            'phoneNumber' => 99991111
+            'phoneNumber' => '99991111'
         ]);
     }
 
-    public function testCreateClientWithBlankFirstName() {
+    public function testCreateClientWithBlankFirstName()
+    {
         $json = $this->getDefaultClientAsArray(['firstName' => '']);
         static::createClient()->request('POST', '/api/customers', ['json' => $json]);
 
         $this->assertResponseStatusCodeSame(422);
     }
 
-    public function testCreateWithBlankLastName() {
+    public function testCreateWithBlankLastName()
+    {
         $json = $this->getDefaultClientAsArray(['lastName' => '']);
         static::createClient()->request('POST', '/api/customers', ['json' => $json]);
 
         $this->assertResponseStatusCodeSame(422);
     }
 
-    public function testCreateWithInvalidPhoneNumber() {
+    public function testCreateWithInvalidPhoneNumber()
+    {
         $json = $this->getDefaultClientAsArray(['phoneNumber' => -111]);
+        static::createClient()->request('POST', '/api/customers', ['json' => $json]);
+
+        $this->assertResponseStatusCodeSame(400);
+    }
+
+    public function testCreateWithInvalidDni()
+    {
+        $json = $this->getDefaultClientAsArray(['dni' => -111]);
+        static::createClient()->request('POST', '/api/customers', ['json' => $json]);
+
+        $this->assertResponseStatusCodeSame(400);
+    }
+
+    public function testCreateWithBlankNumber()
+    {
+        $json = $this->getDefaultClientAsArray(['phoneNumber' => '']);
         static::createClient()->request('POST', '/api/customers', ['json' => $json]);
 
         $this->assertResponseStatusCodeSame(422);
     }
 
-    public function testCreateWithInvalidDni() {
-        $json = $this->getDefaultClientAsArray(['dni' => -111]);
+    public function testCreateWithBlankDni()
+    {
+        $json = $this->getDefaultClientAsArray(['dni' => '']);
         static::createClient()->request('POST', '/api/customers', ['json' => $json]);
 
         $this->assertResponseStatusCodeSame(422);

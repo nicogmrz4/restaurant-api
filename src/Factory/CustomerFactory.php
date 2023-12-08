@@ -48,10 +48,10 @@ final class CustomerFactory extends ModelFactory
     {
         return [
             'createdAt' => \DateTimeImmutable::createFromMutable(self::faker()->dateTime()),
-            'dni' => self::faker()->randomNumber(8),
+            'dni' => self::faker()->randomNumber(8, true),
             'firstName' => self::faker()->firstName(),
             'lastName' => self::faker()->lastName(),
-            'phoneNumber' => self::faker()->randomNumber(8),
+            'phoneNumber' => self::faker()->e164PhoneNumber(),
         ];
     }
 
